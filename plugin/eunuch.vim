@@ -22,21 +22,29 @@ function! s:separator()
 endfunction
 
 command! -bar -bang Unlink
-      \ if <bang>1 && &modified |
-      \   edit |
-      \ elseif delete(expand('%')) |
-      \   echoerr 'Failed to delete "'.expand('%').'"' |
-      \ else |
-      \   edit! |
-      \ endif
+      \ let s:file = fnamemodify(bufname(<q-args>),':p') |
+      \ let s:choice = confirm("Confirm to remove file: ".s:file." ?", "&Yes\n&No", 1) |
+      \ if s:choice == 1 |
+      \   if <bang>1 && &modified |
+      \     edit |
+      \   elseif delete(s:file) |
+      \     echoerr 'Failed to delete "'.s:file.'"' |
+      \   endif |
+      \ endif |
+      \ unlet s:file |
+      \ unlet s:choice
 
 command! -bar -bang Remove
       \ let s:file = fnamemodify(bufname(<q-args>),':p') |
-      \ execute 'bdelete<bang>' |
-      \ if !bufloaded(s:file) && delete(s:file) |
-      \   echoerr 'Failed to delete "'.s:file.'"' |
+      \ let s:choice = confirm("Confirm to remove file: ".s:file." ?", "&Yes\n&No", 1) |
+      \ if s:choice == 1 |
+      \   execute 'bdelete<bang>' |
+      \   if !bufloaded(s:file) && delete(s:file) |
+      \     echoerr 'Failed to delete "'.s:file.'"' |
+      \   endif |
       \ endif |
-      \ unlet s:file
+      \ unlet s:file |
+      \ unlet s:choice
 
 command! -bar -nargs=1 -bang -complete=file Move :
       \ let s:src = expand('%:p') |
